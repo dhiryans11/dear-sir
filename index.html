@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>A Letter For You — Dearest Sir</title>
+  <meta name="description" content="An intimate digital letter experience with smooth opening and closing animations." />
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a7282f'><path d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg>" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Fullscreen Canvas Container -->
+  <main class="letter-app" id="letterApp">
+
+    <!-- Card & Video Showcase Wrapper (9:16 aspect ratio) -->
+    <div class="letter-container" id="letterContainer">
+
+      <!-- Forward Opening Video Layer -->
+      <video
+        id="videoForward"
+        class="envelope-media forward-media active-media"
+        src="nscardani.mp4#t=0.001"
+        preload="auto"
+        playsinline
+        webkit-playsinline
+        muted
+      ></video>
+
+      <!-- Reverse Closing Video Layer -->
+      <video
+        id="videoReverse"
+        class="envelope-media reverse-media"
+        src="nscardanirev.mp4#t=0.001"
+        preload="auto"
+        playsinline
+        webkit-playsinline
+        muted
+      ></video>
+
+      <!-- High-Resolution Final Letter Image (letterns.png) -->
+      <img
+        id="finalLetterImage"
+        class="final-letter-image"
+        src="letterns.png"
+        alt="Dearest Sir Letter"
+        draggable="false"
+      />
+
+      <!-- Minimal Tap-To-Open Hint -->
+      <div class="touch-prompt" id="touchPrompt">
+        <div class="prompt-pulse"></div>
+        <span class="prompt-text">tap to open</span>
+      </div>
+
+      <!-- Minimal Control Bar (appears after letter is opened) -->
+      <div class="letter-controls" id="letterControls">
+        <button class="btn-action" id="btnReplay" type="button" aria-label="Fold and close letter">
+          <svg viewBox="0 0 24 24" class="action-icon">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+          <span>Fold & Close</span>
+        </button>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
