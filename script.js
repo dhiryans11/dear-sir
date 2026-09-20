@@ -1,9 +1,8 @@
 /* ==========================================================================
-   BIDIRECTIONAL DIGITAL LETTER CONTROLLER
-   - Shows initial closed envelope
-   - Plays forward opening video upon touch
-   - Reveals crystal-clear final letter (letterns.png)
-   - Plays smooth reverse video animation upon closing
+   DIGITAL LETTER CONTROLLER
+   - Flawless mobile viewport centering
+   - Dreamy blur-dissolve transition from video into sharp final letter
+   - Seamless reverse folding animation
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -16,8 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnReplay = document.getElementById('btnReplay');
 
   let state = 'closed'; // 'closed' | 'opening' | 'opened' | 'closing'
+  let dissolveTriggered = false;
 
-  // Pre-set video initial frames
+  // Initialize initial video frames
   function initVideos() {
     videoForward.currentTime = 0.001;
     videoForward.pause();
@@ -36,14 +36,17 @@ document.addEventListener('DOMContentLoaded', () => {
     videoReverse.currentTime = 0.001;
   });
 
-  // Start Opening (Forward Animation)
+  // START OPENING ANIMATION (Forward Video)
   function playOpenAnimation() {
     if (state !== 'closed') return;
     state = 'opening';
+    dissolveTriggered = false;
 
+    // Reset visual classes
     prompt.classList.add('hidden');
+    videoForward.classList.remove('soft-blur-out');
+    finalImage.classList.remove('revealed', 'soft-blur-out');
     videoReverse.classList.remove('active-reverse');
-    finalImage.classList.remove('revealed');
     controls.classList.remove('visible');
 
     videoForward.currentTime = 0;
@@ -58,34 +61,45 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // When Forward Animation completes -> Reveal Letter
-  function onForwardVideoEnd() {
-    if (state !== 'opening') return;
-    state = 'opened';
+  // CINEMATIC BLUR DISSOLVE INTO FINAL LETTER
+  function triggerBlurDissolve() {
+    if (dissolveTriggered) return;
+    dissolveTriggered = true;
 
-    // Seamlessly fade in high-res letter
+    // Softly blur-out the video motion
+    videoForward.classList.add('soft-blur-out');
+
+    // Dreamy blur-in of high-resolution final letter
     finalImage.classList.add('revealed');
 
-    // Pre-arm reverse video at frame 0
-    videoReverse.currentTime = 0.001;
-    videoReverse.pause();
-
-    // Show fold control
+    // Reveal subtle fold control after image settles
     setTimeout(() => {
-      if (state === 'opened') {
-        controls.classList.add('visible');
-      }
-    }, 200);
+      state = 'opened';
+      controls.classList.add('visible');
+
+      // Pre-arm reverse video at 0
+      videoReverse.currentTime = 0.001;
+      videoReverse.pause();
+    }, 450);
   }
 
-  videoForward.addEventListener('ended', onForwardVideoEnd);
+  // Monitor forward video playback to initiate blur-dissolve at the perfect moment
   videoForward.addEventListener('timeupdate', () => {
-    if (state === 'opening' && videoForward.duration && videoForward.currentTime >= videoForward.duration - 0.08) {
-      onForwardVideoEnd();
+    if (state === 'opening' && videoForward.duration) {
+      // Trigger dissolve ~0.35s before video ends as letter reaches top position
+      if (videoForward.currentTime >= videoForward.duration - 0.35) {
+        triggerBlurDissolve();
+      }
     }
   });
 
-  // Start Closing (Reverse Animation)
+  videoForward.addEventListener('ended', () => {
+    if (state === 'opening') {
+      triggerBlurDissolve();
+    }
+  });
+
+  // START CLOSING ANIMATION (Reverse Video)
   function playCloseAnimation() {
     if (state !== 'opened') return;
     state = 'closing';
@@ -93,13 +107,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Hide controls
     controls.classList.remove('visible');
 
+    // Softly blur out the still letter image
+    finalImage.classList.add('soft-blur-out');
+
     // Activate reverse video layer
     videoReverse.classList.add('active-reverse');
     videoReverse.currentTime = 0;
     videoReverse.muted = false;
-
-    // Crossfade: hide letter as reverse animation begins
-    finalImage.classList.remove('revealed');
 
     const playPromise = videoReverse.play();
     if (playPromise !== undefined) {
@@ -108,21 +122,30 @@ document.addEventListener('DOMContentLoaded', () => {
         videoReverse.play();
       });
     }
+
+    // Clean up forward video in background
+    setTimeout(() => {
+      videoForward.classList.remove('soft-blur-out');
+      videoForward.pause();
+      videoForward.currentTime = 0.001;
+      finalImage.classList.remove('revealed', 'soft-blur-out');
+    }, 300);
   }
 
-  // When Reverse Animation completes -> Back to Initial Closed Position
+  // When Reverse Animation ends -> Back to clean closed envelope
   function onReverseVideoEnd() {
     if (state !== 'closing') return;
 
-    // Reset forward video to frame 0
+    // Reset reverse video
+    videoReverse.pause();
+    videoReverse.classList.remove('active-reverse');
+    videoReverse.currentTime = 0.001;
+
+    // Reset forward video
     videoForward.pause();
     videoForward.currentTime = 0.001;
 
-    // Deactivate reverse video layer
-    videoReverse.pause();
-    videoReverse.classList.remove('active-reverse');
-
-    // Restore prompt
+    // Show initial touch prompt
     prompt.classList.remove('hidden');
     state = 'closed';
   }
@@ -139,6 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (state === 'closed') {
       playOpenAnimation();
     } else if (state === 'opened') {
+      // Tapping anywhere on opened letter folds it back
       playCloseAnimation();
     }
   });
